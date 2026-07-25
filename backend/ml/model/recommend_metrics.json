@@ -1,0 +1,11 @@
+{
+  "precision_at_5": 0.3888,
+  "recall_at_5": 0.9018,
+  "evaluated_category_instances": 2779,
+  "n_sessions_train": 4800,
+  "n_sessions_test": 1200,
+  "n_nodes": 8,
+  "n_edges": 56,
+  "top_k": 5,
+  "min_edge_weight": 0.05
+}
