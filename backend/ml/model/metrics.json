@@ -1,0 +1,160 @@
+{
+  "accuracy": 0.9261083743842364,
+  "n_train": 809,
+  "n_test": 203,
+  "labels": [
+    "carpenter",
+    "cleaner",
+    "electrician",
+    "house-rental",
+    "internet-setup",
+    "movers",
+    "painter",
+    "plumber"
+  ],
+  "classification_report": {
+    "carpenter": {
+      "precision": 0.92,
+      "recall": 0.8214285714285714,
+      "f1-score": 0.8679245283018868,
+      "support": 28.0
+    },
+    "cleaner": {
+      "precision": 0.9583333333333334,
+      "recall": 1.0,
+      "f1-score": 0.9787234042553191,
+      "support": 23.0
+    },
+    "electrician": {
+      "precision": 0.8,
+      "recall": 0.7272727272727273,
+      "f1-score": 0.7619047619047619,
+      "support": 22.0
+    },
+    "house-rental": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 57.0
+    },
+    "internet-setup": {
+      "precision": 0.8947368421052632,
+      "recall": 0.9444444444444444,
+      "f1-score": 0.918918918918919,
+      "support": 18.0
+    },
+    "movers": {
+      "precision": 1.0,
+      "recall": 0.9333333333333333,
+      "f1-score": 0.9655172413793104,
+      "support": 15.0
+    },
+    "painter": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 18.0
+    },
+    "plumber": {
+      "precision": 0.7692307692307693,
+      "recall": 0.9090909090909091,
+      "f1-score": 0.8333333333333334,
+      "support": 22.0
+    },
+    "accuracy": 0.9261083743842364,
+    "macro avg": {
+      "precision": 0.9177876180836708,
+      "recall": 0.9169462481962483,
+      "f1-score": 0.9157902735116914,
+      "support": 203.0
+    },
+    "weighted avg": {
+      "precision": 0.9282266342248194,
+      "recall": 0.9261083743842364,
+      "f1-score": 0.9257687800334653,
+      "support": 203.0
+    }
+  },
+  "confusion_matrix": [
+    [
+      23,
+      0,
+      3,
+      0,
+      0,
+      0,
+      0,
+      2
+    ],
+    [
+      0,
+      23,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      16,
+      0,
+      1,
+      0,
+      0,
+      4
+    ],
+    [
+      0,
+      0,
+      0,
+      57,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      17,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1,
+      14,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      18,
+      0
+    ],
+    [
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      20
+    ]
+  ]
+}

@@ -1,0 +1,313 @@
+{
+  "directed": true,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "id": "electrician"
+    },
+    {
+      "id": "carpenter"
+    },
+    {
+      "id": "plumber"
+    },
+    {
+      "id": "house-rental"
+    },
+    {
+      "id": "cleaner"
+    },
+    {
+      "id": "movers"
+    },
+    {
+      "id": "internet-setup"
+    },
+    {
+      "id": "painter"
+    }
+  ],
+  "edges": [
+    {
+      "weight": 0.4482,
+      "source": "electrician",
+      "target": "house-rental"
+    },
+    {
+      "weight": 0.2312,
+      "source": "electrician",
+      "target": "cleaner"
+    },
+    {
+      "weight": 0.2518,
+      "source": "electrician",
+      "target": "movers"
+    },
+    {
+      "weight": 0.4829,
+      "source": "electrician",
+      "target": "plumber"
+    },
+    {
+      "weight": 0.2467,
+      "source": "electrician",
+      "target": "carpenter"
+    },
+    {
+      "weight": 0.0884,
+      "source": "electrician",
+      "target": "internet-setup"
+    },
+    {
+      "weight": 0.1729,
+      "source": "electrician",
+      "target": "painter"
+    },
+    {
+      "weight": 0.3213,
+      "source": "carpenter",
+      "target": "plumber"
+    },
+    {
+      "weight": 0.4035,
+      "source": "carpenter",
+      "target": "electrician"
+    },
+    {
+      "weight": 0.1726,
+      "source": "carpenter",
+      "target": "cleaner"
+    },
+    {
+      "weight": 0.2851,
+      "source": "carpenter",
+      "target": "painter"
+    },
+    {
+      "weight": 0.1939,
+      "source": "carpenter",
+      "target": "movers"
+    },
+    {
+      "weight": 0.1865,
+      "source": "carpenter",
+      "target": "house-rental"
+    },
+    {
+      "weight": 0.1011,
+      "source": "carpenter",
+      "target": "internet-setup"
+    },
+    {
+      "weight": 0.2175,
+      "source": "plumber",
+      "target": "carpenter"
+    },
+    {
+      "weight": 0.2536,
+      "source": "plumber",
+      "target": "movers"
+    },
+    {
+      "weight": 0.4494,
+      "source": "plumber",
+      "target": "house-rental"
+    },
+    {
+      "weight": 0.5345,
+      "source": "plumber",
+      "target": "electrician"
+    },
+    {
+      "weight": 0.2653,
+      "source": "plumber",
+      "target": "cleaner"
+    },
+    {
+      "weight": 0.0768,
+      "source": "plumber",
+      "target": "internet-setup"
+    },
+    {
+      "weight": 0.0945,
+      "source": "plumber",
+      "target": "painter"
+    },
+    {
+      "weight": 0.5242,
+      "source": "house-rental",
+      "target": "cleaner"
+    },
+    {
+      "weight": 0.5342,
+      "source": "house-rental",
+      "target": "movers"
+    },
+    {
+      "weight": 0.4695,
+      "source": "house-rental",
+      "target": "electrician"
+    },
+    {
+      "weight": 0.4253,
+      "source": "house-rental",
+      "target": "plumber"
+    },
+    {
+      "weight": 0.2416,
+      "source": "house-rental",
+      "target": "internet-setup"
+    },
+    {
+      "weight": 0.0858,
+      "source": "house-rental",
+      "target": "painter"
+    },
+    {
+      "weight": 0.1195,
+      "source": "house-rental",
+      "target": "carpenter"
+    },
+    {
+      "weight": 0.5675,
+      "source": "cleaner",
+      "target": "house-rental"
+    },
+    {
+      "weight": 0.4604,
+      "source": "cleaner",
+      "target": "movers"
+    },
+    {
+      "weight": 0.2621,
+      "source": "cleaner",
+      "target": "electrician"
+    },
+    {
+      "weight": 0.2718,
+      "source": "cleaner",
+      "target": "plumber"
+    },
+    {
+      "weight": 0.1738,
+      "source": "cleaner",
+      "target": "internet-setup"
+    },
+    {
+      "weight": 0.1197,
+      "source": "cleaner",
+      "target": "carpenter"
+    },
+    {
+      "weight": 0.0889,
+      "source": "cleaner",
+      "target": "painter"
+    },
+    {
+      "weight": 0.634,
+      "source": "movers",
+      "target": "house-rental"
+    },
+    {
+      "weight": 0.5047,
+      "source": "movers",
+      "target": "cleaner"
+    },
+    {
+      "weight": 0.3129,
+      "source": "movers",
+      "target": "electrician"
+    },
+    {
+      "weight": 0.2848,
+      "source": "movers",
+      "target": "plumber"
+    },
+    {
+      "weight": 0.2611,
+      "source": "movers",
+      "target": "internet-setup"
+    },
+    {
+      "weight": 0.06,
+      "source": "movers",
+      "target": "painter"
+    },
+    {
+      "weight": 0.1474,
+      "source": "movers",
+      "target": "carpenter"
+    },
+    {
+      "weight": 0.524,
+      "source": "internet-setup",
+      "target": "house-rental"
+    },
+    {
+      "weight": 0.3482,
+      "source": "internet-setup",
+      "target": "cleaner"
+    },
+    {
+      "weight": 0.4772,
+      "source": "internet-setup",
+      "target": "movers"
+    },
+    {
+      "weight": 0.0559,
+      "source": "internet-setup",
+      "target": "painter"
+    },
+    {
+      "weight": 0.1575,
+      "source": "internet-setup",
+      "target": "plumber"
+    },
+    {
+      "weight": 0.2009,
+      "source": "internet-setup",
+      "target": "electrician"
+    },
+    {
+      "weight": 0.1404,
+      "source": "internet-setup",
+      "target": "carpenter"
+    },
+    {
+      "weight": 0.4054,
+      "source": "painter",
+      "target": "carpenter"
+    },
+    {
+      "weight": 0.1822,
+      "source": "painter",
+      "target": "cleaner"
+    },
+    {
+      "weight": 0.1121,
+      "source": "painter",
+      "target": "movers"
+    },
+    {
+      "weight": 0.1904,
+      "source": "painter",
+      "target": "house-rental"
+    },
+    {
+      "weight": 0.0572,
+      "source": "painter",
+      "target": "internet-setup"
+    },
+    {
+      "weight": 0.1986,
+      "source": "painter",
+      "target": "plumber"
+    },
+    {
+      "weight": 0.4019,
+      "source": "painter",
+      "target": "electrician"
+    }
+  ]
+}

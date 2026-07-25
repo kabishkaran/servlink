@@ -1,9 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Search, SlidersHorizontal, X, Sparkles, BrainCircuit } from "lucide-react";
 import { listings, categories, aiSuggestions } from "../data/mockData";
 import ListingCard from "../components/ListingCard";
 import AISuggestionPanel from "../components/AISuggestionPanel";
+import AIModelPanel from "../components/AIModelPanel";
+import { classifyQuery } from "../lib/api";
 
 export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -13,17 +15,26 @@ export default function SearchPage() {
   const [ratingMin, setRatingMin] = useState(0);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [showModelInfo, setShowModelInfo] = useState(false);
+  const [prediction, setPrediction] = useState(null); // { category, confidence } from the live classifier
 
-  // Derive AI suggestions from category
+  // Live-classify free text into a category via the trained model (debounced).
+  // Picking a category pill instead of typing skips the model entirely.
+  useEffect(() => {
+    if (activeCategory || !query.trim()) { setPrediction(null); return; }
+    const handle = setTimeout(() => {
+      classifyQuery(query).then(setPrediction).catch(() => setPrediction(null));
+    }, 300);
+    return () => clearTimeout(handle);
+  }, [query, activeCategory]);
+
+  // AI suggestions still come from the curated category->related-category table;
+  // only *which* category applies now comes from the model instead of keyword rules.
   const suggestions = useMemo(() => {
     if (activeCategory) return aiSuggestions[activeCategory] || [];
-    const q = query.toLowerCase();
-    if (q.includes("house") || q.includes("rent") || q.includes("apartment")) return aiSuggestions["house-rental"] || [];
-    if (q.includes("electric")) return aiSuggestions["electrician"] || [];
-    if (q.includes("plumb")) return aiSuggestions["plumber"] || [];
-    if (q.includes("mov")) return aiSuggestions["movers"] || [];
+    if (prediction) return aiSuggestions[prediction.category] || [];
     return [];
-  }, [query, activeCategory]);
+  }, [activeCategory, prediction]);
 
   const filtered = useMemo(() => {
     return listings.filter(l => {
@@ -60,7 +71,17 @@ export default function SearchPage() {
               className={`flex items-center gap-2 border rounded-xl px-4 py-2.5 text-sm font-medium transition ${showFilters ? "bg-primary-50 border-primary-400 text-primary-600" : "border-gray-200 text-gray-600 hover:border-gray-300"}`}>
               <SlidersHorizontal size={15} /> Filters
             </button>
+            <button type="button" onClick={() => setShowModelInfo(!showModelInfo)}
+              className={`flex items-center gap-2 border rounded-xl px-4 py-2.5 text-sm font-medium transition ${showModelInfo ? "bg-primary-50 border-primary-400 text-primary-600" : "border-gray-200 text-gray-600 hover:border-gray-300"}`}>
+              <BrainCircuit size={15} /> Model info
+            </button>
           </form>
+
+          {showModelInfo && (
+            <div className="mt-3">
+              <AIModelPanel />
+            </div>
+          )}
 
           {/* Category pills */}
           <div className="flex gap-2 mt-3 overflow-x-auto scrollbar-hide pb-1">
@@ -134,7 +155,13 @@ export default function SearchPage() {
 
           {/* AI Panel */}
           {suggestions.length > 0 && (
-            <div className="hidden lg:block w-72 flex-shrink-0">
+            <div className="hidden lg:block w-72 flex-shrink-0 space-y-3">
+              {prediction && !activeCategory && (
+                <div className="flex items-center gap-2 bg-primary-50 border border-primary-200 rounded-xl px-3 py-2 text-xs text-primary-700">
+                  <Sparkles size={13} className="flex-shrink-0" />
+                  <span>Model read this as <strong className="capitalize">{prediction.category.replace(/-/g, " ")}</strong> ({Math.round(prediction.confidence * 100)}% confidence)</span>
+                </div>
+              )}
               <AISuggestionPanel suggestions={suggestions} query={query} />
             </div>
           )}
