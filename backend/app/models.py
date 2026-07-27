@@ -34,6 +34,11 @@ class BookingStatus(str, enum.Enum):
     cancelled = "cancelled"
 
 
+class SearchLogSource(str, enum.Enum):
+    quiz = "quiz"
+    search = "search"
+
+
 class User(Base):
     __tablename__ = "users"
 
@@ -130,3 +135,15 @@ class Review(Base):
 
     listing: Mapped["Listing"] = relationship(back_populates="reviews")
     author: Mapped["User"] = relationship()
+
+
+class SearchLog(Base):
+    __tablename__ = "search_logs"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    category: Mapped[str] = mapped_column(String(100), nullable=False)
+    source: Mapped[SearchLogSource] = mapped_column(Enum(SearchLogSource), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    user: Mapped["User"] = relationship()
