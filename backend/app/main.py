@@ -7,6 +7,8 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from app.routers import auth
+
 BASE_DIR = Path(__file__).resolve().parent.parent  # backend/
 ML_DIR = BASE_DIR / "ml"
 
@@ -29,6 +31,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(auth.router)
 
 _classifier = joblib.load(ML_DIR / "model" / "classifier.joblib")
 with open(ML_DIR / "model" / "metrics.json", encoding="utf-8") as f:
