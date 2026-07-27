@@ -4,17 +4,27 @@ import { useAuth } from "../context/AuthContext";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function Register() {
-  const { login } = useAuth();
+  const { register } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name:"", email:"", password:"", role:"customer" });
   const [showPw, setShowPw] = useState(false);
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const set = k => e => setForm(f => ({...f, [k]: e.target.value}));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    login(form.email, form.role);
-    navigate(form.role === "provider" ? "/provider/register" : "/");
+    setError("");
+    setSubmitting(true);
+    try {
+      const user = await register(form);
+      navigate(user.role === "provider" ? "/provider/register" : "/");
+    } catch (err) {
+      setError(err.message || "Registration failed.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -42,6 +52,7 @@ export default function Register() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {error && <div className="bg-red-50 text-red-600 text-sm px-4 py-2.5 rounded-xl border border-red-100">{error}</div>}
             <div>
               <label className="text-xs font-medium text-gray-600 block mb-1.5">Full name</label>
               <input value={form.name} onChange={set("name")} placeholder="Your full name"
@@ -62,9 +73,9 @@ export default function Register() {
                 </button>
               </div>
             </div>
-            <button type="submit"
-              className="w-full bg-primary-400 hover:bg-primary-600 text-white py-3 rounded-xl font-semibold text-sm transition mt-2">
-              Create account
+            <button type="submit" disabled={submitting}
+              className="w-full bg-primary-400 hover:bg-primary-600 text-white py-3 rounded-xl font-semibold text-sm transition mt-2 disabled:opacity-60">
+              {submitting ? "Creating account…" : "Create account"}
             </button>
           </form>
 

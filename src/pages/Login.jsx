@@ -8,15 +8,23 @@ export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("customer");
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email || !password) { setError("Please fill in all fields."); return; }
-    login(email, role);
-    navigate(role === "provider" ? "/provider/dashboard" : "/");
+    setError("");
+    setSubmitting(true);
+    try {
+      const user = await login(email, password);
+      navigate(user.role === "provider" ? "/provider/dashboard" : user.role === "admin" ? "/admin" : "/");
+    } catch (err) {
+      setError(err.message || "Sign in failed.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -35,16 +43,6 @@ export default function Login() {
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-          {/* Role selector */}
-          <div className="flex bg-gray-100 rounded-xl p-1 mb-6">
-            {["customer", "provider"].map(r => (
-              <button key={r} onClick={() => setRole(r)}
-                className={`flex-1 py-2 rounded-lg text-sm font-medium transition capitalize ${role === r ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
-                {r === "customer" ? "Customer" : "Provider"}
-              </button>
-            ))}
-          </div>
-
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && <div className="bg-red-50 text-red-600 text-sm px-4 py-2.5 rounded-xl border border-red-100">{error}</div>}
             <div>
@@ -65,9 +63,9 @@ export default function Login() {
                 </button>
               </div>
             </div>
-            <button type="submit"
-              className="w-full bg-primary-400 hover:bg-primary-600 text-white py-3 rounded-xl font-semibold text-sm transition mt-2">
-              Sign in
+            <button type="submit" disabled={submitting}
+              className="w-full bg-primary-400 hover:bg-primary-600 text-white py-3 rounded-xl font-semibold text-sm transition mt-2 disabled:opacity-60">
+              {submitting ? "Signing in…" : "Sign in"}
             </button>
           </form>
 
@@ -78,7 +76,7 @@ export default function Login() {
 
         {/* Demo hint */}
         <div className="mt-4 p-3 bg-primary-50 rounded-xl border border-primary-100 text-center">
-          <p className="text-xs text-primary-700">💡 Demo: use any email + any password to sign in</p>
+          <p className="text-xs text-primary-700">💡 Demo: customer@servlink.lk / password123</p>
         </div>
       </div>
     </div>
