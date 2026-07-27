@@ -1,4 +1,8 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings
+
+BASE_DIR = Path(__file__).resolve().parent.parent  # backend/
 
 
 class Settings(BaseSettings):
@@ -8,7 +12,7 @@ class Settings(BaseSettings):
     upload_dir: str = "uploads"
 
     class Config:
-        env_file = ".env"
+        env_file = BASE_DIR / ".env"
 
 
 settings = Settings()
