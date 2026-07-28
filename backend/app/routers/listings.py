@@ -30,7 +30,7 @@ def to_listing_out(listing: Listing) -> ListingOut:
             id=listing.provider.id,
             business_name=listing.provider.business_name,
             verified=listing.provider.verification_status == VerificationStatus.approved,
-            top_rated=review_count >= 5 and rating >= 4.7,
+            top_rated=review_count >= 2 and rating >= 4.5,
         ),
         rating=rating,
         review_count=review_count,

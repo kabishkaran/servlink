@@ -22,7 +22,10 @@ def to_booking_out(booking: Booking) -> BookingOut:
     return BookingOut(
         id=booking.id,
         listing=BookingListingOut(
-            id=booking.listing.id, title=booking.listing.title, image_url=booking.listing.image_url,
+            id=booking.listing.id,
+            title=booking.listing.title,
+            image_url=booking.listing.image_url,
+            provider_name=booking.listing.provider.business_name,
         ),
         customer_name=booking.customer.name,
         booking_date=booking.booking_date,

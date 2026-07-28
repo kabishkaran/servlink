@@ -9,7 +9,7 @@ from app.config import settings
 from app.database import get_db
 from app.deps import get_current_user
 from app.models import User
-from app.schemas import LoginRequest, RegisterRequest, TokenResponse, UserOut
+from app.schemas import LoginRequest, RegisterRequest, TokenResponse, UserOut, UserUpdateRequest
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -44,4 +44,17 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
 
 @router.get("/me", response_model=UserOut)
 def me(current_user: User = Depends(get_current_user)):
+    return current_user
+
+
+@router.patch("/me", response_model=UserOut)
+def update_me(
+    payload: UserUpdateRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if payload.name is not None:
+        current_user.name = payload.name
+    db.commit()
+    db.refresh(current_user)
     return current_user

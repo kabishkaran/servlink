@@ -34,6 +34,10 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class UserUpdateRequest(BaseModel):
+    name: str | None = None
+
+
 class UserOut(BaseModel):
     id: int
     email: str
@@ -134,6 +138,7 @@ class BookingListingOut(BaseModel):
     id: int
     title: str
     image_url: str
+    provider_name: str
 
 
 class BookingOut(BaseModel):

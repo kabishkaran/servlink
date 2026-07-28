@@ -126,6 +126,8 @@ REVIEWS = [
     {"listing_title": "3BR Apartment, Bambalapitiya", "author_name": "Harsha W.", "author_email": "harsha.w@example.com", "rating": 4, "comment": "Good apartment but parking can be tight. Otherwise excellent."},
     {"listing_title": "Certified Electrician — Colombo", "author_name": "Chamara R.", "author_email": "chamara.r@example.com", "rating": 5, "comment": "Nimal is very professional and fast. Fixed our wiring in 2 hours!"},
     {"listing_title": "Certified Electrician — Colombo", "author_name": "Dilani M.", "author_email": "dilani.m@example.com", "rating": 5, "comment": "Came same day. Very thorough safety inspection. Will use again."},
+    {"listing_title": "Professional Home Cleaning", "author_name": "Tharindu P.", "author_email": "tharindu.p@example.com", "rating": 5, "comment": "Spotless. Team was on time and very thorough."},
+    {"listing_title": "Professional Home Cleaning", "author_name": "Anusha D.", "author_email": "anusha.d@example.com", "rating": 5, "comment": "Best cleaning service I've used in Colombo. Booking again."},
 ]
 
 
