@@ -1,11 +1,10 @@
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Search, SlidersHorizontal, X, Sparkles, BrainCircuit } from "lucide-react";
-import { listings, categories, aiSuggestions } from "../data/mockData";
+import { getCategories, getListings, getRecommendations, mapListing, classifyQuery } from "../lib/api";
 import ListingCard from "../components/ListingCard";
 import AISuggestionPanel from "../components/AISuggestionPanel";
 import AIModelPanel from "../components/AIModelPanel";
-import { classifyQuery } from "../lib/api";
 
 export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -17,6 +16,13 @@ export default function SearchPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [showModelInfo, setShowModelInfo] = useState(false);
   const [prediction, setPrediction] = useState(null); // { category, confidence } from the live classifier
+  const [categories, setCategories] = useState([]);
+  const [results, setResults] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
+
+  useEffect(() => {
+    getCategories().then(setCategories).catch(() => {});
+  }, []);
 
   // Live-classify free text into a category via the trained model (debounced).
   // Picking a category pill instead of typing skips the model entirely.
@@ -28,24 +34,39 @@ export default function SearchPage() {
     return () => clearTimeout(handle);
   }, [query, activeCategory]);
 
-  // AI suggestions still come from the curated category->related-category table;
-  // only *which* category applies now comes from the model instead of keyword rules.
-  const suggestions = useMemo(() => {
-    if (activeCategory) return aiSuggestions[activeCategory] || [];
-    if (prediction) return aiSuggestions[prediction.category] || [];
-    return [];
-  }, [activeCategory, prediction]);
+  // Fetch listings from the backend whenever the category or price filter changes;
+  // rating/verified are refined client-side since the API doesn't filter on those.
+  useEffect(() => {
+    getListings({ category: activeCategory || undefined, max_price: priceMax, q: query || undefined })
+      .then(data => setResults(data.map(mapListing)))
+      .catch(() => setResults([]));
+  }, [activeCategory, priceMax, query]);
+
+  // AI suggestions now come from the trained co-occurrence graph instead of a
+  // hardcoded lookup table; the category to recommend for still comes from
+  // either the selected pill or the live classifier prediction.
+  useEffect(() => {
+    const slug = activeCategory || prediction?.category;
+    if (!slug) { setSuggestions([]); return; }
+    getRecommendations(slug)
+      .then(data => {
+        const bySlug = Object.fromEntries(categories.map(c => [c.slug, c]));
+        setSuggestions(data.suggestions.map(s => ({
+          category: s.label,
+          icon: bySlug[s.category]?.icon || "✨",
+          reason: s.reason,
+        })));
+      })
+      .catch(() => setSuggestions([]));
+  }, [activeCategory, prediction, categories]);
 
   const filtered = useMemo(() => {
-    return listings.filter(l => {
-      const matchQ = !query || l.title.toLowerCase().includes(query.toLowerCase()) || l.category.toLowerCase().includes(query.toLowerCase()) || l.location.toLowerCase().includes(query.toLowerCase());
-      const matchCat = !activeCategory || l.category.toLowerCase().replace(/ /g,"-") === activeCategory;
-      const matchPrice = l.price <= priceMax;
+    return results.filter(l => {
       const matchRating = l.rating >= ratingMin;
       const matchVerified = !verifiedOnly || l.verified;
-      return matchQ && matchCat && matchPrice && matchRating && matchVerified;
+      return matchRating && matchVerified;
     });
-  }, [query, activeCategory, priceMax, ratingMin, verifiedOnly]);
+  }, [results, ratingMin, verifiedOnly]);
 
   const handleSearch = (e) => {
     e.preventDefault();

@@ -1,12 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Star, Shield, Sparkles, ArrowRight } from "lucide-react";
-import { categories, listings } from "../data/mockData";
+import { getCategories, getListings, mapListing } from "../lib/api";
 import ListingCard from "../components/ListingCard";
 
 export default function Home() {
   const [query, setQuery] = useState("");
+  const [categories, setCategories] = useState([]);
+  const [listings, setListings] = useState([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    getCategories().then(setCategories).catch(() => {});
+    getListings().then(data => setListings(data.map(mapListing))).catch(() => {});
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();

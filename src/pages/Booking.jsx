@@ -1,28 +1,65 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { CheckCircle, ArrowLeft, Calendar, Clock, FileText } from "lucide-react";
-import { listings } from "../data/mockData";
+import { getListing, createBooking, mapListing } from "../lib/api";
+import { useAuth } from "../context/AuthContext";
 
 const STEPS = ["Details", "Schedule", "Confirm"];
 const SLOTS = ["9:00 AM", "11:00 AM", "2:00 PM", "4:00 PM"];
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
+// Maps the day-of-week picker (Mon..Sun) to the next real calendar date for
+// that weekday, since the backend needs an actual date, not just a label.
+function nextDateForWeekday(dayIndex) {
+  const today = new Date();
+  const todayIndex = (today.getDay() + 6) % 7; // convert Sun=0..Sat=6 to Mon=0..Sun=6
+  let delta = dayIndex - todayIndex;
+  if (delta < 0) delta += 7;
+  const result = new Date(today);
+  result.setDate(today.getDate() + delta);
+  return result.toISOString().slice(0, 10);
+}
+
 export default function Booking() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const listing = listings.find(l => l.id === Number(id));
+  const { user, token } = useAuth();
+  const [listing, setListing] = useState(null);
+  const [notFound, setNotFound] = useState(false);
   const [step, setStep] = useState(0);
   const [selectedDay, setSelectedDay] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [notes, setNotes] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  if (!listing) return <div className="p-10 text-center text-gray-400">Listing not found.</div>;
+  useEffect(() => {
+    if (!user) { navigate("/login"); return; }
+    getListing(id).then(l => setListing(mapListing(l))).catch(() => setNotFound(true));
+  }, [id, user]);
+
+  if (notFound) return <div className="p-10 text-center text-gray-400">Listing not found.</div>;
+  if (!listing) return <div className="p-10 text-center text-gray-400">Loading…</div>;
 
   const canNext = step === 0 ? true : step === 1 ? (selectedDay !== null && selectedSlot !== null) : true;
 
-  const handleSubmit = () => {
-    setSubmitted(true);
+  const handleSubmit = async () => {
+    setError("");
+    setSubmitting(true);
+    try {
+      await createBooking({
+        listing_id: listing.id,
+        booking_date: nextDateForWeekday(selectedDay),
+        time_slot: selectedSlot,
+        notes,
+      }, token);
+      setSubmitted(true);
+    } catch (err) {
+      setError(err.message || "Could not submit booking.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -155,12 +192,14 @@ export default function Booking() {
           )}
         </div>
 
+        {error && <div className="bg-red-50 text-red-600 text-sm px-4 py-2.5 rounded-xl border border-red-100 mb-3">{error}</div>}
+
         {/* Next / Submit */}
         <button
-          disabled={!canNext}
+          disabled={!canNext || submitting}
           onClick={() => step < 2 ? setStep(s => s+1) : handleSubmit()}
-          className={`w-full py-3.5 rounded-xl font-semibold text-sm transition ${canNext ? "bg-primary-400 hover:bg-primary-600 text-white" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}>
-          {step < 2 ? "Continue →" : "Send booking request"}
+          className={`w-full py-3.5 rounded-xl font-semibold text-sm transition ${canNext && !submitting ? "bg-primary-400 hover:bg-primary-600 text-white" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}>
+          {step < 2 ? "Continue →" : submitting ? "Sending…" : "Send booking request"}
         </button>
       </div>
     </div>

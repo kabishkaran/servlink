@@ -54,3 +54,67 @@ export function login(payload) {
 export function getMe(token) {
   return request("/auth/me", { token });
 }
+
+export function updateMe(payload, token) {
+  return request("/auth/me", { method: "PATCH", body: payload, token });
+}
+
+let _categoriesCache = null;
+export async function getCategories() {
+  if (!_categoriesCache) _categoriesCache = await request("/categories");
+  return _categoriesCache;
+}
+
+export function getListings(params = {}) {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== "") query.set(k, v);
+  });
+  const qs = query.toString();
+  return request(`/listings${qs ? `?${qs}` : ""}`);
+}
+
+export function getListing(id) {
+  return request(`/listings/${id}`);
+}
+
+export function getListingReviews(id) {
+  return request(`/listings/${id}/reviews`);
+}
+
+export function createBooking(payload, token) {
+  return request("/bookings", { method: "POST", body: payload, token });
+}
+
+export function getMyBookings(token) {
+  return request("/bookings/me", { token });
+}
+
+export function createReview(payload, token) {
+  return request("/reviews", { method: "POST", body: payload, token });
+}
+
+// Adapts the nested API listing shape to the flat shape ListingCard/pages expect.
+export function mapListing(l) {
+  return {
+    id: l.id,
+    categoryId: l.category.id,
+    categorySlug: l.category.slug,
+    category: l.category.name,
+    categoryIcon: l.category.icon,
+    title: l.title,
+    provider: l.provider.business_name,
+    providerId: l.provider.id,
+    rating: l.rating,
+    reviews: l.review_count,
+    price: l.price,
+    unit: l.unit,
+    location: l.location,
+    serviceArea: l.location,
+    verified: l.provider.verified,
+    topRated: l.provider.top_rated,
+    image: l.image_url,
+    description: l.description,
+    available: l.available,
+  };
+}

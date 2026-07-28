@@ -1,6 +1,7 @@
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Star, MapPin, BadgeCheck, MessageSquare, Calendar, ArrowLeft, Share2 } from "lucide-react";
-import { listings, reviews, aiSuggestions } from "../data/mockData";
+import { getListing, getListingReviews, getCategories, getRecommendations, mapListing } from "../lib/api";
 import AISuggestionPanel from "../components/AISuggestionPanel";
 import { useAuth } from "../context/AuthContext";
 
@@ -8,12 +9,32 @@ export default function ListingDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const listing = listings.find(l => l.id === Number(id));
-  if (!listing) return <div className="p-10 text-center text-gray-400">Listing not found.</div>;
+  const [listing, setListing] = useState(null);
+  const [listingReviews, setListingReviews] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
+  const [notFound, setNotFound] = useState(false);
 
-  const listingReviews = reviews.filter(r => r.listingId === listing.id);
-  const slug = listing.category.toLowerCase().replace(/ /g, "-");
-  const suggestions = aiSuggestions[slug] || [];
+  useEffect(() => {
+    getListing(id).then(l => setListing(mapListing(l))).catch(() => setNotFound(true));
+    getListingReviews(id).then(setListingReviews).catch(() => {});
+  }, [id]);
+
+  useEffect(() => {
+    if (!listing) return;
+    getCategories().then(categories => {
+      const bySlug = Object.fromEntries(categories.map(c => [c.slug, c]));
+      getRecommendations(listing.categorySlug)
+        .then(data => setSuggestions(data.suggestions.map(s => ({
+          category: s.label,
+          icon: bySlug[s.category]?.icon || "✨",
+          reason: s.reason,
+        }))))
+        .catch(() => setSuggestions([]));
+    }).catch(() => {});
+  }, [listing]);
+
+  if (notFound) return <div className="p-10 text-center text-gray-400">Listing not found.</div>;
+  if (!listing) return <div className="p-10 text-center text-gray-400">Loading…</div>;
 
   const handleBook = () => {
     if (!user) { navigate("/login"); return; }
@@ -96,8 +117,8 @@ export default function ListingDetail() {
                   {listingReviews.map(r => (
                     <div key={r.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="font-medium text-sm text-gray-800">{r.author}</span>
-                        <span className="text-xs text-gray-400">{r.date}</span>
+                        <span className="font-medium text-sm text-gray-800">{r.author_name}</span>
+                        <span className="text-xs text-gray-400">{new Date(r.created_at).toLocaleDateString()}</span>
                       </div>
                       <div className="flex gap-0.5 mb-2">
                         {Array.from({length:5}).map((_,i) => (
