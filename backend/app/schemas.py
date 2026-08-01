@@ -106,14 +106,6 @@ class ListingUpdate(BaseModel):
     available: bool | None = None
 
 
-class ProviderRegisterRequest(BaseModel):
-    business_name: str
-    category_slug: str
-    description: str = ""
-    service_area: str = ""
-    pricing_model: PricingModel = PricingModel.hourly
-
-
 class ProviderOut(BaseModel):
     id: int
     business_name: str
@@ -176,3 +168,31 @@ class ReviewOut(BaseModel):
     rating: int
     comment: str
     created_at: datetime
+
+
+class ProviderPendingOut(BaseModel):
+    id: int
+    business_name: str
+    category: CategoryOut
+    user_name: str
+    user_email: str
+    nic_document_path: str | None
+    cert_document_path: str | None
+    submitted_at: datetime
+
+
+class ProviderVerifyRequest(BaseModel):
+    approve: bool
+
+
+class ListingModerationRequest(BaseModel):
+    available: bool
+
+
+class AdminAnalyticsOut(BaseModel):
+    total_users: int
+    total_providers: int
+    total_listings: int
+    total_bookings: int
+    listings_by_category: list[dict]
+    bookings_by_status: dict[str, int]
