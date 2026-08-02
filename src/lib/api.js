@@ -31,6 +31,26 @@ async function request(path, { method = "GET", body, token } = {}) {
   return res.json();
 }
 
+// Like request(), but sends a FormData body (multipart) instead of JSON —
+// the browser sets the Content-Type boundary itself, so it's left unset here.
+async function requestForm(path, { method = "POST", formData, token } = {}) {
+  const headers = {};
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const res = await fetch(`${BASE_URL}${path}`, { method, headers, body: formData });
+
+  if (!res.ok) {
+    let data = null;
+    try {
+      data = await res.json();
+    } catch {
+      // response had no JSON body
+    }
+    throw new Error(extractErrorMessage(data, `${method} ${path} failed: ${res.status}`));
+  }
+  return res.json();
+}
+
 export function classifyQuery(text) {
   return request("/ai/classify", { method: "POST", body: { text } });
 }
@@ -92,6 +112,26 @@ export function getMyBookings(token) {
 
 export function createReview(payload, token) {
   return request("/reviews", { method: "POST", body: payload, token });
+}
+
+export function registerProvider(formData, token) {
+  return requestForm("/providers/register", { formData, token });
+}
+
+export function getMyProviderProfile(token) {
+  return request("/providers/me", { token });
+}
+
+export function getMyListings(token) {
+  return request("/listings/mine", { token });
+}
+
+export function updateBookingStatus(id, status, token) {
+  return request(`/bookings/${id}`, { method: "PATCH", body: { status }, token });
+}
+
+export function getProviderBookings(token) {
+  return request("/bookings/provider", { token });
 }
 
 // Adapts the nested API listing shape to the flat shape ListingCard/pages expect.

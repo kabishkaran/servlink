@@ -52,7 +52,7 @@ function ReviewForm({ booking, token, onSubmitted }) {
 }
 
 export default function CustomerProfile() {
-  const { user, token, logout, updateProfile } = useAuth();
+  const { user, token, loading, logout, updateProfile } = useAuth();
   const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [reviewingId, setReviewingId] = useState(null);
@@ -61,12 +61,14 @@ export default function CustomerProfile() {
   const [saveStatus, setSaveStatus] = useState("");
 
   useEffect(() => {
-    if (!user) return;
+    if (loading) return;
+    if (!user) { navigate("/login"); return; }
     setDisplayName(user.name);
     getMyBookings(token).then(setBookings).catch(() => {});
-  }, [user, token]);
+  }, [user, token, loading]);
 
-  if (!user) { navigate("/login"); return null; }
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-gray-400">Loading…</div>;
+  if (!user) return null;
 
   const handleSaveProfile = async () => {
     setSaveStatus("saving");

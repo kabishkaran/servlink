@@ -1,18 +1,52 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle, Upload, MapPin } from "lucide-react";
-import { categories } from "../data/mockData";
+import { getCategories, registerProvider } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 
 export default function ProviderRegister() {
-  const { user } = useAuth();
+  const { user, token, loading } = useAuth();
   const navigate = useNavigate();
+  const [categories, setCategories] = useState([]);
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
-  const [form, setForm] = useState({ name:"", category:"", description:"", pricing:"hourly", price:"", area:"", nic:null, cert:null });
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({ name:"", category:"", description:"", pricing:"hourly", area:"", nic:null, cert:null });
   const set = k => e => setForm(f => ({...f, [k]: e.target.value}));
+  const setFile = k => e => setForm(f => ({...f, [k]: e.target.files?.[0] || null}));
+
+  useEffect(() => {
+    if (loading) return;
+    if (!user) { navigate("/login"); return; }
+    getCategories().then(setCategories).catch(() => {});
+  }, [user, loading]);
 
   const STEPS = ["Profile", "Listing", "Documents"];
+
+  const handleSubmit = async () => {
+    setError("");
+    setSubmitting(true);
+    try {
+      const formData = new FormData();
+      formData.append("business_name", form.name);
+      formData.append("category_slug", form.category);
+      formData.append("description", form.description);
+      formData.append("service_area", form.area);
+      formData.append("pricing_model", form.pricing);
+      if (form.nic) formData.append("nic_document", form.nic);
+      if (form.cert) formData.append("cert_document", form.cert);
+      await registerProvider(formData, token);
+      setSubmitted(true);
+    } catch (err) {
+      setError(err.message || "Could not submit application.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-gray-400">Loading…</div>;
+  if (!user) return null;
 
   if (submitted) return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
@@ -91,27 +125,12 @@ export default function ProviderRegister() {
                   ))}
                 </div>
               </div>
-              {form.pricing !== "quotation" && (
-                <div>
-                  <label className="text-xs font-medium text-gray-600 block mb-1.5">Price (Rs.)</label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-400">Rs.</span>
-                    <input type="number" value={form.price} onChange={set("price")} placeholder="e.g. 2500"
-                      className="w-full border border-gray-200 rounded-xl pl-12 pr-4 py-3 text-sm outline-none focus:border-primary-400 transition" />
-                  </div>
-                </div>
-              )}
               <div>
                 <label className="text-xs font-medium text-gray-600 block mb-1.5 flex items-center gap-1"><MapPin size={11} /> Service area</label>
                 <input value={form.area} onChange={set("area")} placeholder="e.g. Colombo, Nugegoda, Dehiwala"
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-primary-400 transition" />
               </div>
-              <div className="bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl p-6 text-center">
-                <div className="text-3xl mb-2">📷</div>
-                <p className="text-sm font-medium text-gray-700 mb-1">Upload portfolio photos</p>
-                <p className="text-xs text-gray-400">Up to 10 photos · JPG, PNG</p>
-                <button className="mt-3 bg-white border border-gray-200 text-sm text-gray-600 px-4 py-2 rounded-lg hover:border-primary-400 transition">Choose files</button>
-              </div>
+              <p className="text-xs text-gray-400">You can add priced listings and portfolio photos from your dashboard once your profile is approved.</p>
             </div>
           )}
 
@@ -120,6 +139,8 @@ export default function ProviderRegister() {
             <div className="space-y-4">
               <h2 className="font-semibold text-gray-900 mb-1">Identity verification</h2>
               <p className="text-sm text-gray-500 mb-4">Upload your NIC to get verified. This is required before your listing goes live.</p>
+
+              {error && <div className="bg-red-50 text-red-600 text-sm px-4 py-2.5 rounded-xl border border-red-100">{error}</div>}
 
               {[
                 { key:"nic", label:"National Identity Card (NIC)", required:true },
@@ -130,21 +151,21 @@ export default function ProviderRegister() {
                     <span className="text-sm font-medium text-gray-900">{doc.label}</span>
                     {doc.required && <span className="text-xs text-red-500 font-medium">Required</span>}
                   </div>
-                  <div className={`border-2 border-dashed rounded-xl p-4 text-center transition ${form[doc.key] ? "border-primary-400 bg-primary-50" : "border-gray-200 hover:border-gray-300"}`}>
+                  <label className={`block border-2 border-dashed rounded-xl p-4 text-center transition cursor-pointer ${form[doc.key] ? "border-primary-400 bg-primary-50" : "border-gray-200 hover:border-gray-300"}`}>
+                    <input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" className="hidden" onChange={setFile(doc.key)} />
                     {form[doc.key] ? (
                       <div className="flex items-center justify-center gap-2 text-primary-600">
                         <CheckCircle size={16} />
-                        <span className="text-sm font-medium">File selected</span>
+                        <span className="text-sm font-medium truncate max-w-[220px]">{form[doc.key].name}</span>
                       </div>
                     ) : (
                       <>
                         <Upload size={20} className="text-gray-400 mx-auto mb-1" />
                         <p className="text-xs text-gray-400">PDF, JPG, PNG</p>
-                        <button onClick={() => setForm(f => ({...f, [doc.key]: "mock-file.pdf"}))}
-                          className="mt-2 text-xs text-primary-600 font-medium hover:text-primary-400">Select file</button>
+                        <span className="mt-2 inline-block text-xs text-primary-600 font-medium hover:text-primary-400">Select file</span>
                       </>
                     )}
-                  </div>
+                  </label>
                 </div>
               ))}
 
@@ -156,9 +177,10 @@ export default function ProviderRegister() {
         </div>
 
         <button
-          onClick={() => step < 2 ? setStep(s => s+1) : setSubmitted(true)}
-          className="w-full bg-primary-400 hover:bg-primary-600 text-white py-3.5 rounded-xl font-semibold text-sm transition">
-          {step < 2 ? "Continue →" : "Submit application"}
+          disabled={submitting || (step === 2 && !form.nic)}
+          onClick={() => step < 2 ? setStep(s => s+1) : handleSubmit()}
+          className="w-full bg-primary-400 hover:bg-primary-600 text-white py-3.5 rounded-xl font-semibold text-sm transition disabled:opacity-60">
+          {step < 2 ? "Continue →" : submitting ? "Submitting…" : "Submit application"}
         </button>
       </div>
     </div>

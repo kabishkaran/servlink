@@ -23,7 +23,7 @@ function nextDateForWeekday(dayIndex) {
 export default function Booking() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, token } = useAuth();
+  const { user, token, loading } = useAuth();
   const [listing, setListing] = useState(null);
   const [notFound, setNotFound] = useState(false);
   const [step, setStep] = useState(0);
@@ -35,12 +35,14 @@ export default function Booking() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    if (loading) return;
     if (!user) { navigate("/login"); return; }
     getListing(id).then(l => setListing(mapListing(l))).catch(() => setNotFound(true));
-  }, [id, user]);
+  }, [id, user, loading]);
 
+  if (loading) return <div className="p-10 text-center text-gray-400">Loading…</div>;
   if (notFound) return <div className="p-10 text-center text-gray-400">Listing not found.</div>;
-  if (!listing) return <div className="p-10 text-center text-gray-400">Loading…</div>;
+  if (!user || !listing) return <div className="p-10 text-center text-gray-400">Loading…</div>;
 
   const canNext = step === 0 ? true : step === 1 ? (selectedDay !== null && selectedSlot !== null) : true;
 
