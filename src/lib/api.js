@@ -1,4 +1,5 @@
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+export const SERVER_URL = BASE_URL.replace(/\/api\/?$/, "");
 
 function extractErrorMessage(data, fallback) {
   if (!data?.detail) return fallback;
@@ -132,6 +133,18 @@ export function updateBookingStatus(id, status, token) {
 
 export function getProviderBookings(token) {
   return request("/bookings/provider", { token });
+}
+
+export function getPendingProviders(token) {
+  return request("/admin/providers/pending", { token });
+}
+
+export function verifyProvider(id, approve, token) {
+  return request(`/admin/providers/${id}/verify`, { method: "PATCH", body: { approve }, token });
+}
+
+export function getAdminAnalytics(token) {
+  return request("/admin/analytics", { token });
 }
 
 // Adapts the nested API listing shape to the flat shape ListingCard/pages expect.
