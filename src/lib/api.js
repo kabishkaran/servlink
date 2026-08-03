@@ -147,6 +147,18 @@ export function getAdminAnalytics(token) {
   return request("/admin/analytics", { token });
 }
 
+export function logSearch(category, token) {
+  return request("/search-log", { method: "POST", body: { category }, token });
+}
+
+export function submitOnboardingQuiz(categories, token) {
+  return request("/onboarding/quiz", { method: "POST", body: { categories }, token });
+}
+
+export function getPersonalizedRecommendations(category, token, limit = 5) {
+  return request(`/ai/recommend/personalized?category=${encodeURIComponent(category)}&limit=${limit}`, { token });
+}
+
 // Adapts the nested API listing shape to the flat shape ListingCard/pages expect.
 export function mapListing(l) {
   return {

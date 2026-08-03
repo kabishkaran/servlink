@@ -9,6 +9,7 @@ import ListingDetail from "./pages/ListingDetail";
 import Booking from "./pages/Booking";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Onboarding from "./pages/Onboarding";
 import CustomerProfile from "./pages/CustomerProfile";
 import ProviderRegister from "./pages/ProviderRegister";
 import ProviderDashboard from "./pages/ProviderDashboard";
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="/booking/:id" element={<WithNav><Booking /></WithNav>} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/profile" element={<WithNav><CustomerProfile /></WithNav>} />
           <Route path="/provider/register" element={<WithNav><ProviderRegister /></WithNav>} />
           <Route path="/provider/dashboard" element={<ProviderDashboard />} />

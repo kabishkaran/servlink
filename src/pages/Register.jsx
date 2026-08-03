@@ -19,7 +19,7 @@ export default function Register() {
     setSubmitting(true);
     try {
       const user = await register(form);
-      navigate(user.role === "provider" ? "/provider/register" : "/");
+      navigate(user.role === "provider" ? "/provider/register" : "/onboarding");
     } catch (err) {
       setError(err.message || "Registration failed.");
     } finally {

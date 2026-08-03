@@ -1,12 +1,14 @@
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Search, SlidersHorizontal, X, Sparkles, BrainCircuit } from "lucide-react";
-import { getCategories, getListings, getRecommendations, mapListing, classifyQuery } from "../lib/api";
+import { getCategories, getListings, getRecommendations, getPersonalizedRecommendations, logSearch, mapListing, classifyQuery } from "../lib/api";
 import ListingCard from "../components/ListingCard";
 import AISuggestionPanel from "../components/AISuggestionPanel";
 import AIModelPanel from "../components/AIModelPanel";
+import { useAuth } from "../context/AuthContext";
 
 export default function SearchPage() {
+  const { user, token } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("q") || "");
   const [activeCategory, setActiveCategory] = useState(searchParams.get("category") || "");
@@ -42,13 +44,14 @@ export default function SearchPage() {
       .catch(() => setResults([]));
   }, [activeCategory, priceMax, query]);
 
-  // AI suggestions now come from the trained co-occurrence graph instead of a
-  // hardcoded lookup table; the category to recommend for still comes from
-  // either the selected pill or the live classifier prediction.
+  // AI suggestions come from the trained co-occurrence graph; logged-in users
+  // get it blended with their own search history (see /ai/recommend/personalized),
+  // anonymous users get the plain global graph.
   useEffect(() => {
     const slug = activeCategory || prediction?.category;
     if (!slug) { setSuggestions([]); return; }
-    getRecommendations(slug)
+    const fetchSuggestions = user ? getPersonalizedRecommendations(slug, token) : getRecommendations(slug);
+    fetchSuggestions
       .then(data => {
         const bySlug = Object.fromEntries(categories.map(c => [c.slug, c]));
         setSuggestions(data.suggestions.map(s => ({
@@ -58,7 +61,15 @@ export default function SearchPage() {
         })));
       })
       .catch(() => setSuggestions([]));
-  }, [activeCategory, prediction, categories]);
+  }, [activeCategory, prediction, categories, user, token]);
+
+  // Log real searches for logged-in users so their future suggestions can be
+  // personalized (fire-and-forget — never blocks or affects the UI).
+  useEffect(() => {
+    const slug = activeCategory || prediction?.category;
+    if (!slug || !user) return;
+    logSearch(slug, token).catch(() => {});
+  }, [activeCategory, prediction?.category, user, token]);
 
   const filtered = useMemo(() => {
     return results.filter(l => {
