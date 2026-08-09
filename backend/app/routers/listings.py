@@ -28,6 +28,7 @@ def to_listing_out(listing: Listing) -> ListingOut:
         category=CategoryOut.model_validate(listing.category),
         provider=ProviderPublicOut(
             id=listing.provider.id,
+            user_id=listing.provider.user_id,
             business_name=listing.provider.business_name,
             verified=listing.provider.verification_status == VerificationStatus.approved,
             top_rated=review_count >= 2 and rating >= 4.5,

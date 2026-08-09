@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from app import ai
-from app.routers import admin, auth, bookings, categories, listings, providers, reviews, search_log, uploads
+from app.routers import admin, auth, bookings, categories, listings, messages, providers, reviews, search_log, uploads
 from app.storage import UPLOAD_DIR
 
 app = FastAPI(title="ServLink API")
@@ -25,6 +25,7 @@ app.include_router(reviews.router)
 app.include_router(uploads.router)
 app.include_router(admin.router)
 app.include_router(search_log.router)
+app.include_router(messages.router)
 
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 

@@ -147,6 +147,22 @@ export function getAdminAnalytics(token) {
   return request("/admin/analytics", { token });
 }
 
+export function getAllUsers(token) {
+  return request("/admin/users", { token });
+}
+
+export function setUserActive(id, isActive, token) {
+  return request(`/admin/users/${id}`, { method: "PATCH", body: { is_active: isActive }, token });
+}
+
+export function getAllListingsAdmin(token) {
+  return request("/admin/listings", { token });
+}
+
+export function moderateListing(id, available, token) {
+  return request(`/admin/listings/${id}/moderate`, { method: "PATCH", body: { available }, token });
+}
+
 export function logSearch(category, token) {
   return request("/search-log", { method: "POST", body: { category }, token });
 }
@@ -157,6 +173,18 @@ export function submitOnboardingQuiz(categories, token) {
 
 export function getPersonalizedRecommendations(category, token, limit = 5) {
   return request(`/ai/recommend/personalized?category=${encodeURIComponent(category)}&limit=${limit}`, { token });
+}
+
+export function sendMessage(payload, token) {
+  return request("/messages", { method: "POST", body: payload, token });
+}
+
+export function getMessageThreads(token) {
+  return request("/messages/threads", { token });
+}
+
+export function getMessageThread(otherUserId, token) {
+  return request(`/messages/thread/${otherUserId}`, { token });
 }
 
 // Adapts the nested API listing shape to the flat shape ListingCard/pages expect.
@@ -170,6 +198,7 @@ export function mapListing(l) {
     title: l.title,
     provider: l.provider.business_name,
     providerId: l.provider.id,
+    providerUserId: l.provider.user_id,
     rating: l.rating,
     reviews: l.review_count,
     price: l.price,

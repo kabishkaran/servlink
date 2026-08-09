@@ -41,6 +41,18 @@ export default function ListingDetail() {
     navigate(`/booking/${listing.id}`);
   };
 
+  const handleMessage = () => {
+    if (!user) { navigate("/login"); return; }
+    navigate("/messages", {
+      state: {
+        recipientId: listing.providerUserId,
+        recipientName: listing.provider,
+        listingId: listing.id,
+        listingTitle: listing.title,
+      },
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Back */}
@@ -161,10 +173,12 @@ export default function ListingDetail() {
                 className="w-full bg-primary-400 hover:bg-primary-600 text-white py-3 rounded-xl font-semibold text-sm transition mb-3 flex items-center justify-center gap-2">
                 <Calendar size={15} /> Request booking
               </button>
-              <button onClick={() => { if (!user) navigate("/login"); }}
-                className="w-full border border-gray-200 hover:border-primary-400 text-gray-700 hover:text-primary-600 py-3 rounded-xl font-medium text-sm transition flex items-center justify-center gap-2">
-                <MessageSquare size={15} /> Message provider
-              </button>
+              {user?.id !== listing.providerUserId && (
+                <button onClick={handleMessage}
+                  className="w-full border border-gray-200 hover:border-primary-400 text-gray-700 hover:text-primary-600 py-3 rounded-xl font-medium text-sm transition flex items-center justify-center gap-2">
+                  <MessageSquare size={15} /> Message provider
+                </button>
+              )}
 
               <p className="text-xs text-gray-400 text-center mt-3">No charge until you confirm</p>
             </div>

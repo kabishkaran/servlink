@@ -65,6 +65,7 @@ class CategoryOut(BaseModel):
 
 class ProviderPublicOut(BaseModel):
     id: int
+    user_id: int
     business_name: str
     verified: bool
     top_rated: bool = False
@@ -196,3 +197,53 @@ class AdminAnalyticsOut(BaseModel):
     total_bookings: int
     listings_by_category: list[dict]
     bookings_by_status: dict[str, int]
+
+
+class MessageCreate(BaseModel):
+    recipient_id: int
+    body: str
+    listing_id: int | None = None
+
+    @field_validator("body")
+    @classmethod
+    def validate_body(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("message body cannot be empty")
+        return value
+
+
+class MessageOut(BaseModel):
+    id: int
+    sender_id: int
+    sender_name: str
+    recipient_id: int
+    recipient_name: str
+    listing_id: int | None
+    listing_title: str | None
+    body: str
+    read: bool
+    created_at: datetime
+
+
+class ThreadOut(BaseModel):
+    other_user_id: int
+    other_user_name: str
+    last_message: str
+    last_message_at: datetime
+    unread_count: int
+
+
+class AdminUserOut(BaseModel):
+    id: int
+    email: str
+    name: str
+    role: UserRole
+    is_active: bool
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UserActiveUpdateRequest(BaseModel):
+    is_active: bool

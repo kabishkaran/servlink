@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { Search, Menu, X, User, LogOut, LayoutDashboard } from "lucide-react";
+import { Search, Menu, X, User, LogOut, LayoutDashboard, MessageSquare } from "lucide-react";
 import { useState } from "react";
 
 export default function Navbar() {
@@ -43,6 +43,11 @@ export default function Navbar() {
                       className="flex items-center gap-2 px-4 py-3 hover:bg-gray-50 text-sm">
                       <LayoutDashboard size={15} /> Dashboard
                     </Link>
+                    <Link to="/messages"
+                      onClick={() => setProfileOpen(false)}
+                      className="flex items-center gap-2 px-4 py-3 hover:bg-gray-50 text-sm">
+                      <MessageSquare size={15} /> Messages
+                    </Link>
                     <button onClick={handleLogout}
                       className="w-full flex items-center gap-2 px-4 py-3 hover:bg-gray-50 text-sm text-red-600">
                       <LogOut size={15} /> Sign out
@@ -72,7 +77,10 @@ export default function Navbar() {
             <Link to="/search" onClick={() => setMenuOpen(false)} className="block text-gray-300 hover:text-white text-sm py-1">Browse</Link>
             <Link to="/provider/register" onClick={() => setMenuOpen(false)} className="block text-gray-300 hover:text-white text-sm py-1">Become a Provider</Link>
             {user ? (
-              <button onClick={() => { handleLogout(); setMenuOpen(false); }} className="block text-red-400 text-sm py-1">Sign out</button>
+              <>
+                <Link to="/messages" onClick={() => setMenuOpen(false)} className="block text-gray-300 hover:text-white text-sm py-1">Messages</Link>
+                <button onClick={() => { handleLogout(); setMenuOpen(false); }} className="block text-red-400 text-sm py-1">Sign out</button>
+              </>
             ) : (
               <div className="flex gap-3 pt-2">
                 <Link to="/login" onClick={() => setMenuOpen(false)} className="text-gray-300 text-sm">Sign in</Link>

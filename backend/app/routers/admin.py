@@ -7,10 +7,12 @@ from app.deps import require_role
 from app.models import Booking, Category, Listing, Provider, User, UserRole, VerificationStatus
 from app.schemas import (
     AdminAnalyticsOut,
+    AdminUserOut,
     ListingModerationRequest,
     ListingOut,
     ProviderPendingOut,
     ProviderVerifyRequest,
+    UserActiveUpdateRequest,
 )
 from app.routers.listings import to_listing_out
 
@@ -67,6 +69,37 @@ def moderate_listing(listing_id: int, payload: ListingModerationRequest, db: Ses
     db.commit()
     db.refresh(listing)
     return to_listing_out(listing)
+
+
+@router.get("/users", response_model=list[AdminUserOut])
+def list_users(db: Session = Depends(get_db)):
+    return db.query(User).order_by(User.id).all()
+
+
+@router.patch("/users/{user_id}", response_model=AdminUserOut)
+def set_user_active(
+    user_id: int,
+    payload: UserActiveUpdateRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role(UserRole.admin)),
+):
+    if user_id == current_user.id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot suspend your own account")
+
+    user = db.get(User, user_id)
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    user.is_active = payload.is_active
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+@router.get("/listings", response_model=list[ListingOut])
+def list_all_listings(db: Session = Depends(get_db)):
+    listings = db.query(Listing).order_by(Listing.id).all()
+    return [to_listing_out(listing) for listing in listings]
 
 
 @router.get("/analytics", response_model=AdminAnalyticsOut)
