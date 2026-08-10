@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Search, SlidersHorizontal, X, Sparkles, BrainCircuit } from "lucide-react";
-import { getCategories, getListings, getRecommendations, getPersonalizedRecommendations, logSearch, mapListing, classifyQuery } from "../lib/api";
+import { getCategories, getListings, getRecommendations, getPersonalizedRecommendations, logSearch, mapListing, classifyQuery, attachTopListings } from "../lib/api";
 import ListingCard from "../components/ListingCard";
 import AISuggestionPanel from "../components/AISuggestionPanel";
 import AIModelPanel from "../components/AIModelPanel";
@@ -36,13 +36,20 @@ export default function SearchPage() {
     return () => clearTimeout(handle);
   }, [query, activeCategory]);
 
-  // Fetch listings from the backend whenever the category or price filter changes;
-  // rating/verified are refined client-side since the API doesn't filter on those.
+  // Fetch listings whenever the category, price filter, or classified query changes.
+  // Once the classifier has resolved a natural-language query to a category, search
+  // by that category instead of literal text — "toilet cistern overflowing" should
+  // surface plumbers, not listings whose title happens to contain that phrase.
   useEffect(() => {
-    getListings({ category: activeCategory || undefined, max_price: priceMax, q: query || undefined })
+    const effectiveCategory = activeCategory || prediction?.category;
+    getListings({
+      category: effectiveCategory || undefined,
+      max_price: priceMax,
+      q: effectiveCategory ? undefined : (query || undefined),
+    })
       .then(data => setResults(data.map(mapListing)))
       .catch(() => setResults([]));
-  }, [activeCategory, priceMax, query]);
+  }, [activeCategory, prediction, priceMax, query]);
 
   // AI suggestions come from the trained co-occurrence graph; logged-in users
   // get it blended with their own search history (see /ai/recommend/personalized),
@@ -54,11 +61,13 @@ export default function SearchPage() {
     fetchSuggestions
       .then(data => {
         const bySlug = Object.fromEntries(categories.map(c => [c.slug, c]));
-        setSuggestions(data.suggestions.map(s => ({
+        const withLabels = data.suggestions.map(s => ({
+          categorySlug: s.category,
           category: s.label,
           icon: bySlug[s.category]?.icon || "✨",
           reason: s.reason,
-        })));
+        }));
+        attachTopListings(withLabels).then(setSuggestions);
       })
       .catch(() => setSuggestions([]));
   }, [activeCategory, prediction, categories, user, token]);

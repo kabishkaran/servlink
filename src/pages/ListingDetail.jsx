@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Star, MapPin, BadgeCheck, MessageSquare, Calendar, ArrowLeft, Share2 } from "lucide-react";
-import { getListing, getListingReviews, getCategories, getRecommendations, mapListing } from "../lib/api";
+import { getListing, getListingReviews, getCategories, getRecommendations, mapListing, attachTopListings } from "../lib/api";
 import AISuggestionPanel from "../components/AISuggestionPanel";
 import { useAuth } from "../context/AuthContext";
 
@@ -24,11 +24,15 @@ export default function ListingDetail() {
     getCategories().then(categories => {
       const bySlug = Object.fromEntries(categories.map(c => [c.slug, c]));
       getRecommendations(listing.categorySlug)
-        .then(data => setSuggestions(data.suggestions.map(s => ({
-          category: s.label,
-          icon: bySlug[s.category]?.icon || "✨",
-          reason: s.reason,
-        }))))
+        .then(data => {
+          const withLabels = data.suggestions.map(s => ({
+            categorySlug: s.category,
+            category: s.label,
+            icon: bySlug[s.category]?.icon || "✨",
+            reason: s.reason,
+          }));
+          attachTopListings(withLabels).then(setSuggestions);
+        })
         .catch(() => setSuggestions([]));
     }).catch(() => {});
   }, [listing]);

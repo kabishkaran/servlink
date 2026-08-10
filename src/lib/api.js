@@ -127,6 +127,18 @@ export function getMyListings(token) {
   return request("/listings/mine", { token });
 }
 
+export function createListing(payload, token) {
+  return request("/listings", { method: "POST", body: payload, token });
+}
+
+export function updateListing(id, payload, token) {
+  return request(`/listings/${id}`, { method: "PATCH", body: payload, token });
+}
+
+export function deleteListing(id, token) {
+  return request(`/listings/${id}`, { method: "DELETE", token });
+}
+
 export function updateBookingStatus(id, status, token) {
   return request(`/bookings/${id}`, { method: "PATCH", body: { status }, token });
 }
@@ -185,6 +197,23 @@ export function getMessageThreads(token) {
 
 export function getMessageThread(otherUserId, token) {
   return request(`/messages/thread/${otherUserId}`, { token });
+}
+
+// Enriches AI suggestions (category + reason) with a real top-rated listing
+// from that category, so the panel shows an actual result to click into
+// instead of just a category label.
+export async function attachTopListings(suggestions) {
+  return Promise.all(
+    suggestions.map(async (s) => {
+      try {
+        const listings = await getListings({ category: s.categorySlug });
+        const mapped = listings.map(mapListing).sort((a, b) => b.rating - a.rating);
+        return { ...s, listing: mapped[0] || null };
+      } catch {
+        return { ...s, listing: null };
+      }
+    })
+  );
 }
 
 // Adapts the nested API listing shape to the flat shape ListingCard/pages expect.

@@ -1,5 +1,5 @@
-import { useNavigate } from "react-router-dom";
-import { Sparkles, ThumbsUp, ThumbsDown, ChevronRight } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Sparkles, ThumbsUp, ThumbsDown, ChevronRight, Star } from "lucide-react";
 import { useState } from "react";
 
 export default function AISuggestionPanel({ suggestions, query }) {
@@ -20,22 +20,39 @@ export default function AISuggestionPanel({ suggestions, query }) {
       <p className="text-xs text-gray-500 mb-4 ml-9">Based on your search</p>
 
       {/* Suggestion cards */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         {suggestions.map((s, i) => (
-          <button key={i}
-            onClick={() => navigate(`/search?category=${s.category.toLowerCase().replace(/ /g, "-")}`)}
-            className="w-full text-left bg-white border border-primary-100 hover:border-primary-400 rounded-xl p-3 transition-all group">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-lg">{s.icon}</span>
-                <div>
-                  <div className="text-sm font-medium text-gray-900 group-hover:text-primary-600 transition">{s.category}</div>
-                  <div className="text-xs text-gray-400">{s.reason}</div>
+          <div key={i} className="bg-white border border-primary-100 hover:border-primary-400 rounded-xl overflow-hidden transition-all group">
+            <button onClick={() => navigate(`/search?category=${s.categorySlug}`)} className="w-full text-left p-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">{s.icon}</span>
+                  <div>
+                    <div className="text-sm font-medium text-gray-900 group-hover:text-primary-600 transition">{s.category}</div>
+                    <div className="text-xs text-gray-400">{s.reason}</div>
+                  </div>
                 </div>
+                <ChevronRight size={14} className="text-gray-300 group-hover:text-primary-400 transition flex-shrink-0" />
               </div>
-              <ChevronRight size={14} className="text-gray-300 group-hover:text-primary-400 transition" />
-            </div>
-          </button>
+            </button>
+
+            {/* A real listing behind the suggestion, not just a category label */}
+            {s.listing && (
+              <Link to={`/listing/${s.listing.id}`}
+                className="flex items-center gap-2.5 px-3 pb-3 pt-2 border-t border-gray-50 hover:bg-gray-50 transition">
+                <img src={s.listing.image} alt="" className="w-11 h-11 rounded-lg object-cover flex-shrink-0 bg-gray-100" />
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-medium text-gray-800 truncate">{s.listing.title}</div>
+                  <div className="flex items-center gap-1 text-[11px] text-gray-400 mt-0.5">
+                    <Star size={9} className="text-amber-400 fill-amber-400 flex-shrink-0" />
+                    {s.listing.rating > 0 ? s.listing.rating : "New"}
+                    <span className="mx-0.5">·</span>
+                    Rs. {s.listing.price?.toLocaleString()}
+                  </div>
+                </div>
+              </Link>
+            )}
+          </div>
         ))}
       </div>
 

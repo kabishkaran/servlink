@@ -1,8 +1,90 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { BarChart3, Star, Eye, Calendar, CheckCircle, XCircle, Clock, AlertTriangle } from "lucide-react";
-import { getMyProviderProfile, getMyListings, getProviderBookings, updateBookingStatus } from "../lib/api";
+import { BarChart3, Star, Eye, Calendar, CheckCircle, XCircle, Clock, AlertTriangle, Plus, Pause, Play, Trash2, X } from "lucide-react";
+import { getMyProviderProfile, getMyListings, getProviderBookings, updateBookingStatus, createListing, updateListing, deleteListing } from "../lib/api";
+
+const EMPTY_LISTING_FORM = { title: "", description: "", price: "", unit: "hour", location: "", image_url: "" };
+
+function NewListingModal({ onClose, onCreated, token }) {
+  const [form, setForm] = useState(EMPTY_LISTING_FORM);
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSubmitting(true);
+    try {
+      const listing = await createListing({
+        title: form.title,
+        description: form.description,
+        price: form.price === "" ? null : Number(form.price),
+        unit: form.unit,
+        location: form.location,
+        image_url: form.image_url,
+      }, token);
+      onCreated(listing);
+    } catch (err) {
+      setError(err.message || "Could not create listing.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-gray-900">New listing</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+        </div>
+        <form onSubmit={submit} className="space-y-3">
+          {error && <div className="bg-red-50 text-red-600 text-sm px-3 py-2 rounded-lg border border-red-100">{error}</div>}
+          <div>
+            <label className="text-xs font-medium text-gray-600 block mb-1">Title</label>
+            <input required value={form.title} onChange={set("title")} placeholder="e.g. Emergency Callout Service"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-primary-400" />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-gray-600 block mb-1">Description</label>
+            <textarea rows={3} value={form.description} onChange={set("description")} placeholder="Describe what's included…"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-primary-400 resize-none" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium text-gray-600 block mb-1">Price (Rs.)</label>
+              <input type="number" min="0" value={form.price} onChange={set("price")} placeholder="2500"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-primary-400" />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-gray-600 block mb-1">Unit</label>
+              <select value={form.unit} onChange={set("unit")}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-primary-400 bg-white">
+                {["hour", "session", "day", "move", "setup", "month", "visit"].map(u => <option key={u} value={u}>{u}</option>)}
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="text-xs font-medium text-gray-600 block mb-1">Location</label>
+            <input value={form.location} onChange={set("location")} placeholder="e.g. Colombo 5"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-primary-400" />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-gray-600 block mb-1">Photo URL (optional)</label>
+            <input value={form.image_url} onChange={set("image_url")} placeholder="https://…"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-primary-400" />
+          </div>
+          <button type="submit" disabled={submitting}
+            className="w-full bg-primary-400 hover:bg-primary-600 text-white py-2.5 rounded-lg text-sm font-semibold transition disabled:opacity-60 mt-1">
+            {submitting ? "Creating…" : "Create listing"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 const statusConfig = {
   pending:   { icon:<Clock size={12}/>,        label:"Pending",   cls:"bg-amber-50 text-amber-700 border-amber-200" },
@@ -19,6 +101,7 @@ export default function ProviderDashboard() {
   const [profileMissing, setProfileMissing] = useState(false);
   const [listings, setListings] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [showNewListing, setShowNewListing] = useState(false);
 
   useEffect(() => {
     if (loading) return;
@@ -54,6 +137,25 @@ export default function ProviderDashboard() {
       setBookingLocally(id, { status });
     } catch {
       // leave the booking as-is; the button remains available to retry
+    }
+  };
+
+  const toggleListingAvailable = async (l) => {
+    try {
+      const updated = await updateListing(l.id, { available: !l.available }, token);
+      setListings(ls => ls.map(x => x.id === updated.id ? updated : x));
+    } catch {
+      // leave listing as-is
+    }
+  };
+
+  const removeListing = async (l) => {
+    if (!window.confirm(`Delete "${l.title}"? This can't be undone.`)) return;
+    try {
+      await deleteListing(l.id, token);
+      setListings(ls => ls.filter(x => x.id !== l.id));
+    } catch {
+      // leave listing as-is
     }
   };
 
@@ -169,14 +271,24 @@ export default function ProviderDashboard() {
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-semibold text-gray-900">My listings</h2>
+              <button onClick={() => setShowNewListing(true)}
+                className="flex items-center gap-1.5 bg-primary-400 hover:bg-primary-600 text-white px-3.5 py-2 rounded-xl text-xs font-medium transition">
+                <Plus size={14} /> Add listing
+              </button>
             </div>
             {listings.length === 0 ? (
-              <p className="text-sm text-gray-400">No listings yet.</p>
+              <div className="bg-white rounded-2xl border border-dashed border-gray-200 p-8 text-center">
+                <p className="text-sm text-gray-500 mb-3">No listings yet — customers can't find you until you add one.</p>
+                <button onClick={() => setShowNewListing(true)}
+                  className="inline-flex items-center gap-1.5 bg-primary-400 hover:bg-primary-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition">
+                  <Plus size={14} /> Create your first listing
+                </button>
+              </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {listings.map(l => (
                   <div key={l.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex">
-                    <img src={l.image_url} alt="" className="w-20 h-20 object-cover flex-shrink-0" />
+                    <img src={l.image_url} alt="" className="w-20 h-20 object-cover flex-shrink-0 bg-gray-100" />
                     <div className="p-4 flex-1 min-w-0">
                       <div className="font-medium text-sm text-gray-900 truncate">{l.title}</div>
                       <div className="flex items-center gap-3 mt-1">
@@ -189,6 +301,16 @@ export default function ProviderDashboard() {
                           {l.available ? "Active" : "Paused"}
                         </span>
                       </div>
+                    </div>
+                    <div className="p-3 flex flex-col gap-2 justify-center flex-shrink-0">
+                      <button onClick={() => toggleListingAvailable(l)} title={l.available ? "Pause" : "Reactivate"}
+                        className="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:border-primary-400 hover:text-primary-600 transition">
+                        {l.available ? <Pause size={13} /> : <Play size={13} />}
+                      </button>
+                      <button onClick={() => removeListing(l)} title="Delete"
+                        className="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:border-red-300 hover:text-red-600 transition">
+                        <Trash2 size={13} />
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -226,6 +348,17 @@ export default function ProviderDashboard() {
           </div>
         )}
       </div>
+
+      {showNewListing && (
+        <NewListingModal
+          token={token}
+          onClose={() => setShowNewListing(false)}
+          onCreated={(listing) => {
+            setListings(ls => [...ls, listing]);
+            setShowNewListing(false);
+          }}
+        />
+      )}
     </div>
   );
 }
