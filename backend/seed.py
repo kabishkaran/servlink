@@ -118,6 +118,94 @@ PROVIDERS = [
             "image_url": "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=400&q=80",
         },
     },
+    {
+        "email": "priyantha.wickrama@servlink.lk", "name": "Priyantha Wickrama",
+        "business_name": "Priyantha Wickrama", "category_slug": "electrician",
+        "verification_status": VerificationStatus.approved,
+        "listing": {
+            "title": "24/7 Emergency Electrician",
+            "description": "Round-the-clock callout for urgent electrical faults, tripping breakers, and power outages. Fully licensed.",
+            "price": 3000, "unit": "hour", "location": "Colombo 3",
+            "image_url": "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&q=80",
+        },
+    },
+    {
+        "email": "kasun.silva@servlink.lk", "name": "Kasun Silva",
+        "business_name": "Kasun Silva", "category_slug": "plumber",
+        "verification_status": VerificationStatus.approved,
+        "listing": {
+            "title": "Bathroom & Kitchen Plumbing Specialist",
+            "description": "Bathroom renovations, kitchen sink fitting, leak repairs, and water heater servicing.",
+            "price": 1800, "unit": "hour", "location": "Dehiwala",
+            "image_url": "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=400&q=80",
+        },
+    },
+    {
+        "email": "malith.perera@servlink.lk", "name": "Malith Perera",
+        "business_name": "Malith Perera", "category_slug": "painter",
+        "verification_status": VerificationStatus.approved,
+        "listing": {
+            "title": "Interior & Exterior Painting",
+            "description": "Wall painting, waterproofing, and colour consultation. Free quotation before starting work.",
+            "price": 4000, "unit": "day", "location": "Colombo 7",
+            "image_url": "https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=400&q=80",
+        },
+    },
+    {
+        "email": "dinesh.kumar@servlink.lk", "name": "Dinesh Kumar",
+        "business_name": "Dinesh Kumar", "category_slug": "carpenter",
+        "verification_status": VerificationStatus.pending,
+        "listing": {
+            "title": "Custom Kitchen Cabinets",
+            "description": "Made-to-measure kitchen cabinets, pantry cupboards, and wardrobes in your choice of finish.",
+            "price": 3500, "unit": "hour", "location": "Moratuwa",
+            "image_url": "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=400&q=80",
+        },
+    },
+    {
+        "email": "nadeesha.fonseka@servlink.lk", "name": "Nadeesha Fonseka",
+        "business_name": "Nadeesha Fonseka", "category_slug": "internet-setup",
+        "verification_status": VerificationStatus.approved,
+        "listing": {
+            "title": "Fibre & WiFi Installation Experts",
+            "description": "New fibre connections, mesh WiFi setup for large homes, and dead-zone troubleshooting.",
+            "price": 4000, "unit": "setup", "location": "Colombo 4",
+            "image_url": "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=400&q=80",
+        },
+    },
+    {
+        "email": "isuru.bandara@servlink.lk", "name": "Isuru Bandara",
+        "business_name": "Isuru Bandara", "category_slug": "house-rental",
+        "verification_status": VerificationStatus.approved,
+        "listing": {
+            "title": "Modern Studio Apartment",
+            "description": "Compact fully-furnished studio, ideal for a single professional. Close to public transport.",
+            "price": 45000, "unit": "month", "location": "Rajagiriya",
+            "image_url": "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=400&q=80",
+        },
+    },
+    {
+        "email": "ruwan.jayasinghe@servlink.lk", "name": "Ruwan Jayasinghe",
+        "business_name": "Ruwan Jayasinghe", "category_slug": "cleaner",
+        "verification_status": VerificationStatus.approved,
+        "listing": {
+            "title": "Office & Commercial Cleaning",
+            "description": "Daily, weekly, or one-off cleaning for offices, shops, and commercial spaces.",
+            "price": 6000, "unit": "session", "location": "Colombo",
+            "image_url": "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&q=80",
+        },
+    },
+    {
+        "email": "chathura.silva@servlink.lk", "name": "Chathura Silva",
+        "business_name": "Chathura Silva", "category_slug": "movers",
+        "verification_status": VerificationStatus.approved,
+        "listing": {
+            "title": "Budget Friendly House Movers",
+            "description": "Affordable local moves for small homes and apartments. Small team, no hidden fees.",
+            "price": 12000, "unit": "move", "location": "Colombo",
+            "image_url": "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=400&q=80",
+        },
+    },
 ]
 
 REVIEWS = [
@@ -128,6 +216,11 @@ REVIEWS = [
     {"listing_title": "Certified Electrician — Colombo", "author_name": "Dilani M.", "author_email": "dilani.m@example.com", "rating": 5, "comment": "Came same day. Very thorough safety inspection. Will use again."},
     {"listing_title": "Professional Home Cleaning", "author_name": "Tharindu P.", "author_email": "tharindu.p@example.com", "rating": 5, "comment": "Spotless. Team was on time and very thorough."},
     {"listing_title": "Professional Home Cleaning", "author_name": "Anusha D.", "author_email": "anusha.d@example.com", "rating": 5, "comment": "Best cleaning service I've used in Colombo. Booking again."},
+    {"listing_title": "24/7 Emergency Electrician", "author_name": "Kavindu R.", "author_email": "kavindu.r@example.com", "rating": 5, "comment": "Called at midnight and Priyantha was here in 30 minutes. Lifesaver."},
+    {"listing_title": "24/7 Emergency Electrician", "author_name": "Sanduni P.", "author_email": "sanduni.p@example.com", "rating": 4, "comment": "Fixed the tripping breaker quickly, a bit pricey for a weekday call though."},
+    {"listing_title": "Bathroom & Kitchen Plumbing Specialist", "author_name": "Ruwanthi J.", "author_email": "ruwanthi.j@example.com", "rating": 5, "comment": "Redid our whole bathroom plumbing, neat work and cleaned up after."},
+    {"listing_title": "Modern Studio Apartment", "author_name": "Yohan D.", "author_email": "yohan.d@example.com", "rating": 4, "comment": "Small but well laid out. Great location for commuting."},
+    {"listing_title": "Modern Studio Apartment", "author_name": "Sachini W.", "author_email": "sachini.w@example.com", "rating": 5, "comment": "Isuru was very responsive and the apartment matched the photos exactly."},
 ]
 
 
