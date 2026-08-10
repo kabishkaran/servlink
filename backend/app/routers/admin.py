@@ -113,6 +113,14 @@ def get_analytics(db: Session = Depends(get_db)):
     bookings_by_status = dict(
         db.query(Booking.status, func.count(Booking.id)).group_by(Booking.status).all()
     )
+    providers_by_status = dict(
+        db.query(Provider.verification_status, func.count(Provider.id))
+        .group_by(Provider.verification_status)
+        .all()
+    )
+    users_by_role = dict(
+        db.query(User.role, func.count(User.id)).group_by(User.role).all()
+    )
 
     return AdminAnalyticsOut(
         total_users=db.query(User).count(),
@@ -121,4 +129,6 @@ def get_analytics(db: Session = Depends(get_db)):
         total_bookings=db.query(Booking).count(),
         listings_by_category=[{"category": name, "count": count} for name, count in listings_by_category],
         bookings_by_status={status_.value: count for status_, count in bookings_by_status.items()},
+        providers_by_status={status_.value: count for status_, count in providers_by_status.items()},
+        users_by_role={role.value: count for role, count in users_by_role.items()},
     )

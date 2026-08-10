@@ -197,6 +197,8 @@ class AdminAnalyticsOut(BaseModel):
     total_bookings: int
     listings_by_category: list[dict]
     bookings_by_status: dict[str, int]
+    providers_by_status: dict[str, int]
+    users_by_role: dict[str, int]
 
 
 class MessageCreate(BaseModel):
