@@ -187,6 +187,10 @@ export function getPersonalizedRecommendations(category, token, limit = 5) {
   return request(`/ai/recommend/personalized?category=${encodeURIComponent(category)}&limit=${limit}`, { token });
 }
 
+export function getForYouRecommendations(token, limit = 5) {
+  return request(`/ai/recommend/for-you?limit=${limit}`, { token });
+}
+
 export function sendMessage(payload, token) {
   return request("/messages", { method: "POST", body: payload, token });
 }

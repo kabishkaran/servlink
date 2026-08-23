@@ -23,7 +23,7 @@ export default function AISuggestionPanel({ suggestions, query }) {
       <div className="space-y-3">
         {suggestions.map((s, i) => (
           <div key={i} className="bg-white border border-primary-100 hover:border-primary-400 rounded-xl overflow-hidden transition-all group">
-            <button onClick={() => navigate(`/search?category=${s.categorySlug}`)} className="w-full text-left p-3">
+            <button onClick={() => navigate(s.listing ? `/listing/${s.listing.id}` : `/search?category=${s.categorySlug}`)} className="w-full text-left p-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-lg">{s.icon}</span>

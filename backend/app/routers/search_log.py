@@ -69,22 +69,21 @@ def submit_quiz(
     db.commit()
 
 
-@router.get("/ai/recommend/personalized")
-def recommend_personalized(
-    category: str,
-    limit: int = Query(default=5, ge=1, le=8),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    global_ranked = ai.top_companions(category, limit=8)
-    if global_ranked is None:
-        raise HTTPException(status_code=404, detail=f"Unknown category '{category}'")
-    global_scores = dict(global_ranked)
-
+def _personal_logs(db: Session, current_user: User):
+    """A user's search logs, split into their real searches and the 'established' flag."""
     logs = db.query(SearchLog).filter(SearchLog.user_id == current_user.id).all()
     real_searches = [row for row in logs if row.source == SearchLogSource.search]
     established = len(real_searches) >= REAL_SEARCH_THRESHOLD
+    return logs, real_searches, established
 
+
+def _blended_recommendations(db: Session, current_user: User, category: str, limit: int):
+    global_ranked = ai.top_companions(category, limit=8)
+    if global_ranked is None:
+        return None
+    global_scores = dict(global_ranked)
+
+    logs, real_searches, established = _personal_logs(db, current_user)
     personal_source_logs = real_searches if established else logs
     personal_weight = PERSONAL_WEIGHT_ESTABLISHED if established else PERSONAL_WEIGHT_COLD_START
 
@@ -111,8 +110,47 @@ def recommend_personalized(
         suggestions.append({"category": target, "label": label, "score": round(score, 4), "reason": reason})
 
     return {
-        "category": category,
         "personalized": total > 0,
         "based_on": "search_history" if established and total else ("quiz" if total else "global"),
         "suggestions": suggestions,
+    }
+
+
+@router.get("/ai/recommend/personalized")
+def recommend_personalized(
+    category: str,
+    limit: int = Query(default=5, ge=1, le=8),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    result = _blended_recommendations(db, current_user, category, limit)
+    if result is None:
+        raise HTTPException(status_code=404, detail=f"Unknown category '{category}'")
+    return {"category": category, **result}
+
+
+@router.get("/ai/recommend/for-you")
+def recommend_for_you(
+    limit: int = Query(default=5, ge=1, le=8),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Home page recommendations with no category to seed from — picks one out of
+    the user's own history: their most searched category once established, or
+    their most-picked quiz/early-search category before that."""
+    logs, real_searches, established = _personal_logs(db, current_user)
+    seed_logs = real_searches if established else logs
+    if not seed_logs:
+        return {"has_history": False, "seed_category": None, "suggestions": []}
+
+    seed_category = Counter(row.category for row in seed_logs).most_common(1)[0][0]
+    result = _blended_recommendations(db, current_user, seed_category, limit)
+    if result is None:
+        return {"has_history": False, "seed_category": None, "suggestions": []}
+
+    return {
+        "has_history": True,
+        "seed_category": seed_category,
+        "seed_label": ai.CATEGORY_LABELS.get(seed_category, seed_category),
+        **result,
     }

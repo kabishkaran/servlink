@@ -1,19 +1,36 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Star, Shield, Sparkles, ArrowRight } from "lucide-react";
-import { getCategories, getListings, mapListing } from "../lib/api";
+import { Search, Star, Shield, Sparkles, ArrowRight, ChevronRight } from "lucide-react";
+import { getCategories, getListings, mapListing, getForYouRecommendations, attachTopListings } from "../lib/api";
 import ListingCard from "../components/ListingCard";
+import { useAuth } from "../context/AuthContext";
 
 export default function Home() {
   const [query, setQuery] = useState("");
   const [categories, setCategories] = useState([]);
   const [listings, setListings] = useState([]);
+  const [recommended, setRecommended] = useState([]);
+  const [recommendedFor, setRecommendedFor] = useState(null);
   const navigate = useNavigate();
+  const { user, token } = useAuth();
 
   useEffect(() => {
     getCategories().then(setCategories).catch(() => {});
     getListings().then(data => setListings(data.map(mapListing))).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (!user) { setRecommended([]); setRecommendedFor(null); return; }
+    getForYouRecommendations(token)
+      .then(data => {
+        if (!data.has_history) { setRecommended([]); setRecommendedFor(null); return; }
+        setRecommendedFor({ label: data.seed_label, basedOn: data.based_on });
+        attachTopListings(
+          data.suggestions.map(s => ({ categorySlug: s.category, category: s.label, reason: s.reason }))
+        ).then(setRecommended);
+      })
+      .catch(() => { setRecommended([]); setRecommendedFor(null); });
+  }, [user, token]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -97,6 +114,35 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      {/* Recommended for you */}
+      {recommended.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 py-14">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-7 h-7 bg-primary-400 rounded-lg flex items-center justify-center">
+              <Sparkles size={14} className="text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900">Recommended for you</h2>
+          </div>
+          <p className="text-gray-500 text-sm mb-8">
+            {recommendedFor?.basedOn === "search_history"
+              ? `Based on your searches for ${recommendedFor.label}`
+              : `Based on your interest in ${recommendedFor?.label}`}
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {recommended.filter(s => s.listing).map(s => (
+              <div key={s.categorySlug}>
+                <button onClick={() => navigate(s.listing ? `/listing/${s.listing.id}` : `/search?category=${s.categorySlug}`)}
+                  className="flex items-center justify-between w-full text-left mb-2 group">
+                  <span className="text-xs text-gray-500 group-hover:text-primary-600 transition">{s.reason}</span>
+                  <ChevronRight size={13} className="text-gray-300 group-hover:text-primary-400 transition flex-shrink-0" />
+                </button>
+                <ListingCard listing={s.listing} />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Top rated */}
       <section className="bg-gray-50 py-14">
