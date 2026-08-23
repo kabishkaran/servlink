@@ -11,12 +11,14 @@ export default function Navbar() {
 
   const handleLogout = () => { logout(); navigate("/"); setProfileOpen(false); };
 
+  const logoTarget = user?.role === "provider" ? "/provider/dashboard" : user?.role === "admin" ? "/admin" : "/";
+
   return (
     <nav className="bg-dark text-white sticky top-0 z-50 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
+          <Link to={logoTarget} className="flex items-center gap-2">
             <div className="w-8 h-8 bg-primary-400 rounded-full flex items-center justify-center">
               <span className="text-white font-bold text-sm">S</span>
             </div>
@@ -26,7 +28,9 @@ export default function Navbar() {
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-6">
             <Link to="/search" className="text-gray-300 hover:text-white transition text-sm font-medium">Browse</Link>
-            <Link to="/provider/register" className="text-gray-300 hover:text-white transition text-sm font-medium">Become a Provider</Link>
+            {user?.role !== "provider" && user?.role !== "admin" && (
+              <Link to="/provider/register" className="text-gray-300 hover:text-white transition text-sm font-medium">Become a Provider</Link>
+            )}
             {user ? (
               <div className="relative">
                 <button onClick={() => setProfileOpen(!profileOpen)}
@@ -75,7 +79,9 @@ export default function Navbar() {
         {menuOpen && (
           <div className="md:hidden border-t border-dark-800 py-4 space-y-3">
             <Link to="/search" onClick={() => setMenuOpen(false)} className="block text-gray-300 hover:text-white text-sm py-1">Browse</Link>
-            <Link to="/provider/register" onClick={() => setMenuOpen(false)} className="block text-gray-300 hover:text-white text-sm py-1">Become a Provider</Link>
+            {user?.role !== "provider" && user?.role !== "admin" && (
+              <Link to="/provider/register" onClick={() => setMenuOpen(false)} className="block text-gray-300 hover:text-white text-sm py-1">Become a Provider</Link>
+            )}
             {user ? (
               <>
                 <Link to="/messages" onClick={() => setMenuOpen(false)} className="block text-gray-300 hover:text-white text-sm py-1">Messages</Link>
