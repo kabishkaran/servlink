@@ -74,6 +74,17 @@ PAINT_TERMS = [
 
 TEMPLATES = {
     "house-rental": [
+        "i want a house",
+        "i need a house",
+        "i want an apartment",
+        "i need an apartment",
+        "looking for a house",
+        "looking for a place to stay",
+        "want a {home} in {loc}",
+        "need a {home} in {loc}",
+        "i'm looking for a house",
+        "i'm searching for a house to rent",
+        "want to find a house",
         "looking for a {bed} bedroom {home} to rent in {loc}",
         "need a house for rent near {loc}",
         "want to rent an apartment in {loc} budget rs {price}",
