@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { Bookmark, Star, Settings, Calendar, BadgeCheck } from "lucide-react";
+import { Bookmark, Star, Settings, Calendar, BadgeCheck, MessageSquare } from "lucide-react";
 import { getMyBookings, createReview } from "../lib/api";
 
 const statusStyle = {
@@ -113,6 +113,18 @@ export default function CustomerProfile() {
                 </div>
                 <div className="flex flex-col items-end gap-2 flex-shrink-0">
                   <span className={`text-xs font-medium px-2.5 py-1 rounded-full border capitalize ${statusStyle[b.status]}`}>{b.status}</span>
+                  <button
+                    onClick={() => navigate("/messages", {
+                      state: {
+                        recipientId: b.listing.provider_user_id,
+                        recipientName: b.listing.provider_name,
+                        listingId: b.listing.id,
+                        listingTitle: b.listing.title,
+                      },
+                    })}
+                    className="flex items-center gap-1 text-xs text-gray-500 hover:text-primary-600 font-medium transition">
+                    <MessageSquare size={12} /> Message
+                  </button>
                   {b.status === "completed" && !reviewedIds.includes(b.id) && (
                     <button onClick={() => setReviewingId(reviewingId === b.id ? null : b.id)}
                       className="text-xs text-primary-600 hover:text-primary-400 font-medium">Leave review</button>

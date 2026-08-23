@@ -132,11 +132,13 @@ class BookingListingOut(BaseModel):
     title: str
     image_url: str
     provider_name: str
+    provider_user_id: int
 
 
 class BookingOut(BaseModel):
     id: int
     listing: BookingListingOut
+    customer_id: int
     customer_name: str
     booking_date: date
     time_slot: str

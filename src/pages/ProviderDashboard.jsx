@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { BarChart3, Star, Eye, Calendar, CheckCircle, XCircle, Clock, AlertTriangle, Plus, Pause, Play, Trash2, X } from "lucide-react";
+import { BarChart3, Star, Eye, Calendar, CheckCircle, XCircle, Clock, AlertTriangle, Plus, Pause, Play, Trash2, X, MessageSquare } from "lucide-react";
 import { getMyProviderProfile, getMyListings, getProviderBookings, updateBookingStatus, createListing, updateListing, deleteListing } from "../lib/api";
 
 const EMPTY_LISTING_FORM = { title: "", description: "", price: "", unit: "hour", location: "", image_url: "" };
@@ -247,6 +247,19 @@ export default function ProviderDashboard() {
                       <span className={`flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full border ${statusConfig[b.status].cls}`}>
                         {statusConfig[b.status].icon} {statusConfig[b.status].label}
                       </span>
+                      <button
+                        onClick={() => navigate("/messages", {
+                          state: {
+                            recipientId: b.customer_id,
+                            recipientName: b.customer_name,
+                            listingId: b.listing.id,
+                            listingTitle: b.listing.title,
+                          },
+                        })}
+                        title="Message customer"
+                        className="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:border-primary-400 hover:text-primary-600 transition">
+                        <MessageSquare size={13} />
+                      </button>
                       {b.status === "pending" && (
                         <div className="flex gap-2">
                           <button onClick={() => transition(b.id, "confirmed")}
