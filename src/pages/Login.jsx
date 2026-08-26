@@ -73,11 +73,6 @@ export default function Login() {
             <p className="text-sm text-gray-500">Don't have an account? <Link to="/register" className="text-primary-600 hover:text-primary-400 font-medium transition">Sign up</Link></p>
           </div>
         </div>
-
-        {/* Demo hint */}
-        <div className="mt-4 p-3 bg-primary-50 rounded-xl border border-primary-100 text-center">
-          <p className="text-xs text-primary-700">💡 Demo: customer@servlink.lk / password123</p>
-        </div>
       </div>
     </div>
   );
